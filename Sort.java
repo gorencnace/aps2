@@ -7,17 +7,16 @@ public class Sort {
         
         // stevilo n predstavlja velikost tabele
         
-        System.out.println("   n  | selectionSort | insertionSort |    heapSort   ");
-        System.out.println("------+---------------+---------------+---------------");
+        System.out.println("   n  | selectionSort | insertionSort |    heapSort   |   quickSort   ");
+        System.out.println("------+---------------+---------------+---------------+---------------");
         
         for (int i = 10; i <= 1000; i += 10) {
             long a = timeSelection(i);
             long b = timeInsertion(i);
             long c = timeHeap(i);
-            System.out.printf("%5d |%14d |%14d |%14d %n", i, a, b, c);
-        }
-        
-        
+            long d = timeQuick(i);
+            System.out.printf("%5d |%14d |%14d |%14d |%14d %n", i, a, b, c, d);
+        }        
     }
     
     /* POVPRECNI CASI UREJANJA
@@ -76,7 +75,24 @@ public class Sort {
         return executionTime / 1000;
     }
     
-    /* GENERIRANJE TABELE
+    public static long timeQuick(int n) {
+        
+        long executionTime = 0;
+        
+        for (int i = 0; i < 1000; i++) {
+            Comparable[] a = generateTable(n);
+            
+            long startTime = System.nanoTime();
+            quicksort(a);
+            executionTime =  executionTime + (System.nanoTime() - startTime);
+        }
+        
+        
+        return executionTime / 1000;
+    }
+    
+    /*
+     * GENERIRANJE TABELE
      * generira tabelo dolzine n
      * v kateri so nakljucni elementi od 
      * Integer.MAX_VALUE do Integer.MIN_VALUE
@@ -84,12 +100,49 @@ public class Sort {
     
     public static Comparable[] generateTable(int n) {
         Comparable[] a = new Comparable[n];
-        int seed = Integer.MAX_VALUE;
         
         for (int i = 0; i < n; i++) {
-            a[i] = (Comparable) (int) ((Math.random() * seed) + Integer.MIN_VALUE);
+            a[i] = (Comparable) (int) ((Math.random() * Integer.MAX_VALUE) + Integer.MIN_VALUE);
         }
         return a;
+    }
+    
+    /*
+     * QUICKSORT (casovna zahtevnost O(n * log n))
+     * metoda napisana po psevdokodi iz vaj
+     * - najprej izberemo nek element imenovan pivot
+     * (v mojem primeru element na sredini tabele)
+     * - uredimo tabelo tako, da se iz leve in desne
+     * strani od zacetka pomikano proti pivotu in
+     * pri tem menjamo elemente, ki so lokalno na
+     * straneh glede na pivotni element
+     * - metodo nato rekurzivno ponavljamo na obeh
+     * straneh pivota
+     */
+    
+    public static void quicksort(Comparable[] t) {
+        quicksort(t, 0, t.length - 1);
+    }
+    
+    private static void quicksort(Comparable[] t, int l, int r) {
+        if (l < r) {
+            Comparable pivot = t[(l + r) / 2];
+            int i = l;
+            int j = r;
+            while (i <= j) {
+                while (t[i].compareTo(pivot) < 0)
+                    i++;
+                while (t[j].compareTo(pivot) > 0)
+                    j--;
+                if (i <= j) {
+                    swap(t, i, j);
+                    i++;
+                    j--;
+                }
+            }
+            quicksort(t, l, j);
+            quicksort(t, i, r);
+        }
     }
     
     /*
